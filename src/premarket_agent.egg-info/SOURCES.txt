@@ -32,6 +32,10 @@ src/premarket_agent/services/news.py
 src/premarket_agent/services/portfolio.py
 src/premarket_agent/services/research.py
 src/premarket_agent/services/simulation.py
+src/premarket_agent/ui/__init__.py
+src/premarket_agent/ui/__main__.py
+src/premarket_agent/ui/dashboard.py
 src/premarket_agent/utils/__init__.py
 src/premarket_agent/utils/logging.py
+src/premarket_agent/utils/rate_limit.py
 tests/test_bootstrap.py

@@ -9,7 +9,7 @@ Premarket Agent is a modular, multi-agent research and trading system that conti
 - **Execution Agent**: Places simulated or real orders via broker adapters, handles order state, and enforces risk tolerances.
 - **Post-Trade Agent**: Monitors fills, price action, and news to optimize exits and update performance analytics.
 - **Neural Policy Training Loop**: Collects virtual-trade experiences, updates a PyTorch policy network, and harmonizes it with analyst news and trend signals.
-- **Live Portfolio Dashboard**: Streams paper-trade performance with cash, PnL, and open positions in a color-coded terminal UI.
+- **Live Portfolio Dashboard**: Streams paper-trade performance with cash, PnL, and open positions in an interactive native window or color-coded terminal UI.
 - **Resilient Data Layer**: Shared rate-limiting and a fallback symbol universe keep the agents running when third-party APIs throttle requests.
 - **Simulation & Reinforcement Learning**: Supports paper trading with historical and live market data to train policies before going live.
 
@@ -33,8 +33,9 @@ tests/             # Unit and integration tests
    - `python -m pip install --upgrade --user numexpr==2.7.3 gevent==24.2.1 multitasking==0.0.11`
    - `python -m pip install -e .[dev]`
 3. Copy `.env.example` to `.env` and set broker/API credentials.
-4. Run `python -m premarket_agent.cli` to start the orchestrator and open the live dashboard (paper mode by default).
-5. Train the neural policy with `python -m premarket_agent.cli simulate --episodes 200`.
+4. Run `python -m premarket_agent.cli` to start the orchestrator with the terminal dashboard (paper mode by default).
+5. Launch the native GUI with `python -m premarket_agent.ui` for a rich, continuously updating window.
+6. Train the neural policy with `python -m premarket_agent.cli simulate --episodes 200`.
 
 ## Simulation to Live Workflow
 1. **Data Ingestion**: Collect historical premarket data, news, and fundamentals.
