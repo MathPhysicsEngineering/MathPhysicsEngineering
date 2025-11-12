@@ -152,7 +152,8 @@ class MarketDataService:
             "twoHundredDayAverageVolume",
         )
         volume = int(volume_value or 0)
-        change = ((last_price - prev_close) / prev_close * 100) if prev_close else 0.0
+        # Compute day change percent based on previous close vs current
+        day_change = ((last_price - prev_close) / prev_close * 100) if prev_close else 0.0
         timestamp = dt.datetime.utcnow()
 
         if not last_price or last_price <= 0 or volume <= 0:
@@ -165,15 +166,16 @@ class MarketDataService:
             last = window.iloc[-1]
             last_price = float(last["Close"])
             open_price = float(first["Open"]) or last_price
-            change = (last_price - open_price) / open_price * 100 if open_price else 0.0
+            day_change = (last_price - open_price) / open_price * 100 if open_price else 0.0
             volume = int(window["Volume"].sum())
             timestamp = window.index.max().to_pydatetime()
 
         return TrendingSymbol(
             symbol=symbol,
             last_price=last_price,
-            premarket_change_percent=float(change),
+            premarket_change_percent=float(day_change),
             premarket_volume=volume,
+            day_change_percent=float(day_change),
             reason="yahoo_trending",
             timestamp=timestamp,
         )

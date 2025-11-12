@@ -103,9 +103,14 @@ class DashboardWindow(QMainWindow):
         self._tabs.addTab(self._orders_table, "Recent Orders")
 
         self._trending_table = self._create_table(
-            ["Symbol", "Price", "Premarket %", "Reason", "Summary"]
+            ["Symbol", "Price", "Premarket %", "Day %", "Reason", "Summary"]
         )
         self._tabs.addTab(self._trending_table, "Trending Symbols")
+
+        self._gainers_table = self._create_table(
+            ["Symbol", "Price", "Day %", "Premarket %", "Reason", "Summary"]
+        )
+        self._tabs.addTab(self._gainers_table, "Top Gainers (Day %)")
 
     def _create_table(self, headers: List[str]) -> QTableWidget:
         table = QTableWidget()
@@ -155,6 +160,7 @@ class DashboardWindow(QMainWindow):
         self._update_positions_table(snapshot)
         self._update_orders_table(orders)
         self._update_trending_table(trending, research)
+        self._update_gainers_table(trending, research)
 
     # ------------------------------------------------------------------ Update helpers
 
@@ -211,10 +217,33 @@ class DashboardWindow(QMainWindow):
             if isinstance(artifact, ResearchArtifact):
                 summary_text = artifact.summary
                 summary = summary_text if len(summary_text) <= 120 else summary_text[:117] + "…"
-            summary = ""
             data = [
                 symbol_data.symbol,
                 METRIC_FORMAT.format(symbol_data.last_price),
+                f"{symbol_data.premarket_change_percent:.2f}%",
+                f"{(symbol_data.day_change_percent or 0.0):.2f}%",
+                symbol_data.reason or "—",
+                summary or "Research limited",
+            ]
+            for col, value in enumerate(data):
+                item = QTableWidgetItem(value)
+                table.setItem(row, col, item)
+
+    def _update_gainers_table(self, trending: List[TrendingSymbol], research: Dict[str, object]) -> None:
+        # Sort by day change descending
+        sorted_syms = sorted(trending, key=lambda s: (s.day_change_percent or 0.0), reverse=True)
+        table = self._gainers_table
+        table.setRowCount(len(sorted_syms))
+        for row, symbol_data in enumerate(sorted_syms):
+            artifact = research.get(symbol_data.symbol)
+            summary = ""
+            if isinstance(artifact, ResearchArtifact):
+                summary_text = artifact.summary
+                summary = summary_text if len(summary_text) <= 120 else summary_text[:117] + "…"
+            data = [
+                symbol_data.symbol,
+                METRIC_FORMAT.format(symbol_data.last_price),
+                f"{(symbol_data.day_change_percent or 0.0):.2f}%",
                 f"{symbol_data.premarket_change_percent:.2f}%",
                 symbol_data.reason or "—",
                 summary or "Research limited",

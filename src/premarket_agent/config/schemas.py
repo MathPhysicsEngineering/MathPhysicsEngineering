@@ -25,6 +25,7 @@ class TrendingSymbol(BaseModel):
     last_price: float
     premarket_change_percent: float
     premarket_volume: int
+    day_change_percent: Optional[float] = None
     reason: Optional[str] = None
     timestamp: dt.datetime = Field(default_factory=dt.datetime.utcnow)
 
