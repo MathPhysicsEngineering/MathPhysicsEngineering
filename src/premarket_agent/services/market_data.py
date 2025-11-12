@@ -129,8 +129,10 @@ class MarketDataService:
                     return value
             return None
 
+        # Prefer real-time market price if available
         last_price_value = _fi_get(
             "lastPrice",
+            "regularMarketPrice",
             "lastClose",
             "regularMarketPreviousClose",
             "previousClose",
@@ -152,8 +154,12 @@ class MarketDataService:
             "twoHundredDayAverageVolume",
         )
         volume = int(volume_value or 0)
-        # Compute day change percent based on previous close vs current
-        day_change = ((last_price - prev_close) / prev_close * 100) if prev_close else 0.0
+        # Compute day change percent based on previous close vs current, prefer provider field
+        rmcp = _fi_get("regularMarketChangePercent")
+        if rmcp is not None:
+            day_change = float(rmcp)
+        else:
+            day_change = ((last_price - prev_close) / prev_close * 100) if prev_close else 0.0
         timestamp = dt.datetime.utcnow()
 
         if not last_price or last_price <= 0 or volume <= 0:
@@ -166,6 +172,7 @@ class MarketDataService:
             last = window.iloc[-1]
             last_price = float(last["Close"])
             open_price = float(first["Open"]) or last_price
+            # Fallback approximation for day change when fast_info absent
             day_change = (last_price - open_price) / open_price * 100 if open_price else 0.0
             volume = int(window["Volume"].sum())
             timestamp = window.index.max().to_pydatetime()
