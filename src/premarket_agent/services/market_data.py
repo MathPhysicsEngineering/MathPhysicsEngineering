@@ -67,6 +67,48 @@ class MarketDataService:
         LOGGER.info("found %s trending symbols after filters", len(filtered))
         return filtered[: self._settings.trending_symbol_limit]
 
+    async def fetch_day_gainers(self) -> List[TrendingSymbol]:
+        """Fetch today's top gainers from Yahoo predefined screener."""
+        url = "https://query2.finance.yahoo.com/v1/finance/screener/predefined/saved"
+        params = {"count": 50, "scrIds": "day_gainers"}
+        try:
+            await self._limiter.wait()
+            response = await self._http.get(url, params=params)
+            response.raise_for_status()
+            payload = response.json()
+            results = payload.get("finance", {}).get("result", [])
+            if not results:
+                return []
+            quotes = results[0].get("quotes", []) or []
+            gainers: List[TrendingSymbol] = []
+            for q in quotes:
+                try:
+                    symbol = q.get("symbol")
+                    if not symbol:
+                        continue
+                    last_price = float(q.get("regularMarketPrice") or 0.0)
+                    day_change = float(q.get("regularMarketChangePercent") or 0.0)
+                    volume = int(q.get("regularMarketVolume") or 0)
+                    if last_price <= 0.0:
+                        continue
+                    gainers.append(
+                        TrendingSymbol(
+                            symbol=symbol,
+                            last_price=last_price,
+                            premarket_change_percent=day_change,  # reuse field for filtering/sorting
+                            premarket_volume=volume,
+                            day_change_percent=day_change,
+                            reason="yahoo_day_gainers",
+                        )
+                    )
+                except Exception:
+                    continue
+            # Limit and return
+            return gainers[: self._settings.trending_symbol_limit]
+        except Exception as exc:  # pylint: disable=broad-except
+            LOGGER.warning("failed to fetch day gainers: %s", exc)
+            return []
+
     async def _fetch_yahoo_trending(self) -> List[TrendingSymbol]:
         url = "https://query1.finance.yahoo.com/v1/finance/trending/US"
         await self._limiter.wait()

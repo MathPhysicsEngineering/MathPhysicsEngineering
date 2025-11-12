@@ -133,11 +133,13 @@ class DashboardWindow(QMainWindow):
         snapshot = await self._portfolio.snapshot(TradeMode.PAPER)
         orders = list(self._controller.state.orders)[-50:]
         trending = list(self._controller.state.trending)[:25]
+        day_gainers = list(getattr(self._controller.state, "day_gainers", []))[:50]
         research = dict(self._controller.state.research)
         return {
             "snapshot": snapshot,
             "orders": orders,
             "trending": trending,
+            "day_gainers": day_gainers,
             "research": research,
         }
 
@@ -154,13 +156,14 @@ class DashboardWindow(QMainWindow):
         snapshot: PortfolioSnapshot = data["snapshot"]  # type: ignore[assignment]
         orders: List[OrderEvent] = data["orders"]  # type: ignore[assignment]
         trending: List[TrendingSymbol] = data["trending"]  # type: ignore[assignment]
+        day_gainers: List[TrendingSymbol] = data["day_gainers"]  # type: ignore[assignment]
         research: Dict[str, object] = data["research"]  # type: ignore[assignment]
 
         self._update_metrics(snapshot, len(orders))
         self._update_positions_table(snapshot)
         self._update_orders_table(orders)
         self._update_trending_table(trending, research)
-        self._update_gainers_table(trending, research)
+        self._update_gainers_table(day_gainers or trending, research)
 
     # ------------------------------------------------------------------ Update helpers
 

@@ -11,6 +11,7 @@ from ..config.schemas import OrderEvent, ResearchArtifact, TradePlan, TrendingSy
 @dataclass
 class AgentState:
     trending: List[TrendingSymbol] = field(default_factory=list)
+    day_gainers: List[TrendingSymbol] = field(default_factory=list)
     research: Dict[str, ResearchArtifact] = field(default_factory=dict)
     plans: List[TradePlan] = field(default_factory=list)
     orders: List[OrderEvent] = field(default_factory=list)

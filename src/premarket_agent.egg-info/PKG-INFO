@@ -7,6 +7,7 @@ Author-email: Sergey <sergey@example.com>
 License: MIT
 Requires-Python: >=3.8
 Description-Content-Type: text/markdown
+License-File: LICENSE
 Requires-Dist: requests>=2.31.0
 Requires-Dist: pandas<2.1,>=2.0.3
 Requires-Dist: pydantic>=2.5.0
@@ -47,6 +48,7 @@ Requires-Dist: pre-commit>=3.4.0; extra == "dev"
 Requires-Dist: jupyter>=1.0.0; extra == "dev"
 Requires-Dist: nbformat>=5.9.2; extra == "dev"
 Requires-Dist: nbconvert>=7.10.0; extra == "dev"
+Requires-Dist: watchfiles>=0.21.0; extra == "dev"
 
 # Premarket Agent
 

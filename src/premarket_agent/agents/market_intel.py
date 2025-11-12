@@ -16,9 +16,14 @@ class MarketIntelAgent(Agent):
         self._market_data = market_data
 
     async def run(self, state: AgentState) -> AgentState:
-        trending = await self._market_data.fetch_trending()
+        trending, gainers = await asyncio.gather(
+            self._market_data.fetch_trending(),
+            self._market_data.fetch_day_gainers(),
+        )
         LOGGER.info("intel agent identified %s trending symbols", len(trending))
+        LOGGER.info("intel agent identified %s day gainers", len(gainers))
         state.trending = trending
+        state.day_gainers = gainers
         return state
 
 
